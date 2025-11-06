@@ -10,3 +10,7 @@ class AuthError extends AuthState {
   final String error;
   AuthError(this.error);
 }
+class AuthVerifySuccess extends AuthState{
+  final String message;
+  AuthVerifySuccess(this.message);
+}

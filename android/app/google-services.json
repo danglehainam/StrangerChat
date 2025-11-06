@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "307657646165",
+    "firebase_url": "https://strangerschatbynam-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "strangerschatbynam",
+    "storage_bucket": "strangerschatbynam.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307657646165:android:88036b389df015310b34dc",
+        "android_client_info": {
+          "package_name": "com.example.chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQWFuJoEN5CGRGnDb6wd8_DyZ5AGU9Zio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

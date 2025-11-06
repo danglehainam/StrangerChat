@@ -1,3 +1,6 @@
+import 'package:chat/src/presentation/widgets/custom_button.dart';
+import 'package:chat/src/presentation/widgets/custom_drawer.dart';
+import 'package:chat/src/presentation/widgets/custom_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/utils/toast_utils.dart';
@@ -17,11 +20,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailCtrl = TextEditingController();
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _cfmPasswordCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Đăng ký")),
+      drawer: const CustomDrawer(),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
@@ -38,6 +43,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
               ),
             );
+          } else if (state is AuthVerifySuccess) {
+            showToast(context, state.message);
           }
         },
         builder: (context, state) {
@@ -46,21 +53,31 @@ class _RegisterPageState extends State<RegisterPage> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                TextField(
+                CustomInput(
                   controller: _emailCtrl,
-                  decoration: const InputDecoration(labelText: "Email"),
-                ),
-                TextField(
-                  controller: _usernameCtrl,
-                  decoration: const InputDecoration(labelText: "Tên đăng nhập"),
-                ),
-                TextField(
-                  controller: _passwordCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: "Mật khẩu"),
+                  label: "Email",
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                CustomInput(
+                  controller: _usernameCtrl,
+                  label: "Username",
+                ),
+                const SizedBox(height: 20),
+                CustomInput(
+                  controller: _passwordCtrl,
+                  obscureText: true,
+                  label: "Password",
+                ),
+                const SizedBox(height: 20),
+                CustomInput(
+                  controller: _cfmPasswordCtrl,
+                  obscureText: true,
+                  label: "Confirm Password",
+                ),
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: 'Đăng ký',
+                  loading: loading,
                   onPressed: loading
                       ? null
                       : () {
@@ -69,12 +86,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         _emailCtrl.text.trim(),
                         _usernameCtrl.text.trim(),
                         _passwordCtrl.text.trim(),
+                        _cfmPasswordCtrl.text.trim(),
                       ),
                     );
                   },
-                  child: loading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Đăng ký"),
                 ),
               ],
             ),

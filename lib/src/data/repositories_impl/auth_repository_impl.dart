@@ -39,4 +39,27 @@ class AuthRepositoryImpl implements AuthRepository{
     print(res.body);
     return json.decode(res.body);
   }
+
+  @override
+  Future<Map<String, dynamic>> loginWithCustomToken(String username, String password) async{
+    final res = await http.post(
+      Uri.parse('$baseUrl$getCustomTokenEndpoint'),
+      body: {
+        'username':username,
+        'password':password
+      }
+    );
+    print('$username, $password');
+    print('$baseUrl$getCustomTokenEndpoint');
+    print(res.body);
+    return json.decode(res.body);
+  }
+
+  // @override
+  // Future<Map<String, dynamic>> loginWithEmailPass(String email, String password) async {
+  //   final res = Fire
+  //   );
+  // }
+
+
 }
