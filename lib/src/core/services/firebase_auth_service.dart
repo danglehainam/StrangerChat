@@ -12,9 +12,8 @@ class FirebaseAuthService {
         email: email,
         password: password,
       );
-      return userCredential.user;  // Trả về user nếu đăng nhập thành công
+      return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      // Xử lý các lỗi cụ thể
       if (e.code == 'user-not-found') {
         throw Exception("Không tìm thấy người dùng với email này");
       } else if (e.code == 'wrong-password') {
@@ -29,7 +28,6 @@ class FirebaseAuthService {
     }
   }
 
-  //Đăng nhập với customtoken
   Future<User?> signInWithCustomToken(String customToken) async {
     try {
       UserCredential userCredential =
@@ -42,11 +40,16 @@ class FirebaseAuthService {
     }
   }
 
-  Future<void> signOut() async {
+  User? getCurrentUser() {
     try {
-      await _auth.signOut();
+      User? user = _auth.currentUser;
+      return user;
     } catch (e) {
-      throw Exception("Đăng xuất thất bại: $e");
+      throw Exception("Lỗi lấy thông tin người dùng: $e");
     }
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
   }
 }

@@ -1,9 +1,9 @@
 import 'package:chat/src/core/services/firebase_auth_service.dart';
+import 'package:chat/src/data/datasources/remote/chat_message_remote.dart';
 import 'package:chat/src/data/repositories_impl/auth_repository_impl.dart';
 import 'package:chat/src/presentation/blocs/auth/auth_event.dart';
 import 'package:chat/src/presentation/blocs/auth/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../core/utils/validator_utils.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState>{
@@ -64,6 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>{
   }
 
   Future<void>_onLogin(LoginEvent event, Emitter<AuthState> emit) async {
+    ChatMessageRemote chatRemote = ChatMessageRemote();
     if(!Validator.isValidEmail(event.loginId)){
       if(!Validator.isValidUsername(event.loginId)){
         emit(AuthError("Email hoặc username không hợp lệ"));
@@ -79,21 +80,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>{
             if(res['ok'] == true){
               try{
                 final user = await FirebaseAuthService().signInWithCustomToken(res['customToken']);
-                emit(AuthSuccess("Đăng nhập thành công"));
+                final roomId = await chatRemote.getCurrentRoom(user!.uid);
+                if(roomId != null){
+                  emit(AuthSuccessToChat(roomId));
+                }else{
+                  emit(AuthSuccessToFind(user.uid));
+                }
                 print("===== Thông tin người dùng =====");
-                print("UID: ${user?.uid}");
-                print("Email: ${user?.email}");
-                print("Display Name: ${user?.displayName}");
-                print("Photo URL: ${user?.photoURL}");
-                print("Email Verified: ${user?.emailVerified}");
-                print("Is Anonymous: ${user?.isAnonymous}");
-                print("Phone Number: ${user?.phoneNumber}");
-                print("Metadata (Creation Time): ${user?.metadata.creationTime}");
-                print("Metadata (Last Sign-In Time): ${user?.metadata.lastSignInTime}");
-                print("Provider Data: ${user?.providerData.map((provider) => provider.providerId).toList()}");
+                print("UID: ${user.uid}");
+                print("Email: ${user.email}");
+                print("Display Name: ${user.displayName}");
+                print("Photo URL: ${user.photoURL}");
+                print("Email Verified: ${user.emailVerified}");
+                print("Is Anonymous: ${user.isAnonymous}");
+                print("Phone Number: ${user.phoneNumber}");
+                print("Metadata (Creation Time): ${user.metadata.creationTime}");
+                print("Metadata (Last Sign-In Time): ${user.metadata.lastSignInTime}");
+                print("Provider Data: ${user.providerData.map((provider) => provider.providerId).toList()}");
                 print("================================");
               }catch(e){
                 emit(AuthError("Đăng nhập thất bại: $e"));
+                print("Đăng nhập thất bại: $e");
                 return;
               }
             }else{
@@ -104,14 +111,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>{
           }
         }
       }
-      emit(AuthError("Email hoặc username không hợp lệ"));
       return;
     }else{
       try{
-        final user = FirebaseAuthService().signInWithEmailAndPassword(email: event.loginId, password: event.password);
-        emit(AuthSuccess('Đăng nhập thành công'));
+        final user = await FirebaseAuthService().signInWithEmailAndPassword(email: event.loginId, password: event.password);
+        final roomId = await chatRemote.getCurrentRoom(user!.uid);
+        if(roomId != null){
+          emit(AuthSuccessToChat(roomId));
+        }else{
+          emit(AuthSuccessToFind(user.uid));
+        }
+        print("===== Thông tin người dùng =====");
+        print("UID: ${user.uid}");
+        print("Email: ${user.email}");
+        print("Display Name: ${user.displayName}");
+        print("Photo URL: ${user.photoURL}");
+        print("Email Verified: ${user.emailVerified}");
+        print("Is Anonymous: ${user.isAnonymous}");
+        print("Phone Number: ${user.phoneNumber}");
+        print("Metadata (Creation Time): ${user.metadata.creationTime}");
+        print("Metadata (Last Sign-In Time): ${user.metadata.lastSignInTime}");
+        print("Provider Data: ${user.providerData.map((provider) => provider.providerId).toList()}");
+        print("================================");
       }catch(e){
         emit(AuthError("Đăng nhập thất bại: $e"));
+        print("Đăng nhập thất bại: $e");
       }
     };
   }

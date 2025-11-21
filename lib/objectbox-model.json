@@ -1,0 +1,68 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "2:6112997999193604520",
+      "lastPropertyId": "6:2943317318011655415",
+      "name": "ChatMessageEntity",
+      "properties": [
+        {
+          "id": "1:3470253148965872014",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7568006159010155675",
+          "name": "messageId",
+          "indexId": "2:8667515313103078724",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "3:1896881527918395861",
+          "name": "senderId",
+          "type": 9
+        },
+        {
+          "id": "4:2143956914402578741",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "5:1640528059103612704",
+          "name": "timestamp",
+          "type": 6
+        },
+        {
+          "id": "6:2943317318011655415",
+          "name": "imageUrl",
+          "type": 9
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:6112997999193604520",
+  "lastIndexId": "2:8667515313103078724",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    7433958844582526269
+  ],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    6951347488522286216,
+    8129579374452461329,
+    8634536160469084574,
+    256235378157318296,
+    2253696399601646769,
+    8920763723411953663
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

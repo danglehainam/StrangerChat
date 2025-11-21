@@ -54,12 +54,4 @@ class AuthRepositoryImpl implements AuthRepository{
     print(res.body);
     return json.decode(res.body);
   }
-
-  // @override
-  // Future<Map<String, dynamic>> loginWithEmailPass(String email, String password) async {
-  //   final res = Fire
-  //   );
-  // }
-
-
 }

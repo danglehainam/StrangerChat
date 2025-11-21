@@ -1,4 +1,6 @@
+import 'package:chat/src/core/services/firebase_match_service.dart';
 import 'package:chat/src/data/repositories_impl/auth_repository_impl.dart';
+import 'package:chat/src/data/datasources/remote/chat_message_remote.dart';
 import 'package:chat/src/presentation/blocs/auth/auth_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,15 +8,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app_router.dart';
 import 'firebase_options.dart';
+import 'object_box.dart';
 
+late ObjectBox objectbox;
 Future<void> main()async {
   await dotenv.load(fileName: ".env");
   try {
     print('🚀 [MAIN] Starting app...');
     WidgetsFlutterBinding.ensureInitialized();
     print('✅ [MAIN] WidgetsFlutterBinding initialized');
+    
+    objectbox = await ObjectBox.create();
+    print('✅ [MAIN] Objectbox initialized');
 
-    // Initialize Firebase
     print('🔥 [MAIN] Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -60,18 +66,27 @@ Future<void> main()async {
 }
 
 class MyApp extends StatelessWidget {
-  final repo = AuthRepositoryImpl();
-
   MyApp({super.key});
+
+  final authRepo = AuthRepositoryImpl();
+  final matchRepo = ChatMessageRemote();
+  final firebaseService = FirebaseMatchService();
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthBloc(repo),
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: appRouter,
-        title: 'Đăng ký Demo',
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepositoryImpl>.value(value: authRepo),
+        RepositoryProvider<ChatMessageRemote>.value(value: matchRepo),
+        RepositoryProvider<FirebaseMatchService>.value(value: firebaseService),
+      ],
+      child: BlocProvider(
+        create: (_) => AuthBloc(authRepo),
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          routerConfig: appRouter,
+          title: 'Chat Demo',
+        ),
       ),
     );
   }
