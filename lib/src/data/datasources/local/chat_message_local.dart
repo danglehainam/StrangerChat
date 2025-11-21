@@ -7,6 +7,7 @@ class ChatMessageLocal {
   ChatMessageLocal(this.chatMessageBox);
 
   int saveMessage(ChatMessageEntity message) {
+    print('ChatMessageLocal.saveMessage(): $message');
     return chatMessageBox.put(message);
   }
 

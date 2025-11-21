@@ -23,11 +23,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _init() async {
     final delay = Future.delayed(const Duration(seconds: 1));
+    print('[SplashScreen] Checking user...');
     final user = await _authService.getCurrentUser();
     await delay;
     if (user == null) {
       context.go('/login');
     } else {
+      print('[SplashScreen] User found: ${user.uid}');
+      print('[SplashScreen] Checking current room...');
       final roomId = await chatRemote.getCurrentRoom(user.uid);
       if (roomId != null) {
         FCMTokenManager().startListening();

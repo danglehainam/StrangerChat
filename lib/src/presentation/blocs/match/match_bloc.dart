@@ -18,6 +18,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
       final roomId = event.roomId;
       if (roomId != null) {
         emit(MatchFound(roomId));
+        print("[MatchBloc] roomId: $roomId");
       } else {
         emit(MatchError("RoomId null"));
       }
@@ -32,6 +33,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
 
       if (result["matched"] == true && result["roomId"] != null) {
         emit(MatchFound(result["roomId"]));
+        print("[MatchBloc] roomId: ${result["roomId"]}");
       } else if (result["status"] == "waiting") {
         emit(MatchWaiting());
         _listener = firebase.listenForRoom(event.uid, (roomId) {

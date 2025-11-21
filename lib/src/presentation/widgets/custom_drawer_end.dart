@@ -1,7 +1,12 @@
+import 'package:chat/src/core/utils/toast_utils.dart';
 import 'package:chat/src/data/datasources/remote/chat_message_remote.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../main.dart';
 import '../../core/services/firebase_auth_service.dart';
+import '../../data/datasources/local/chat_message_local.dart';
+import '../../data/repositories_impl/chat_repository_impl.dart';
+import '../../domain/entities/chat_message_entity.dart';
 import 'confirm_dialog.dart';
 
 class CustomDrawerEnd extends StatelessWidget {
@@ -10,6 +15,10 @@ class CustomDrawerEnd extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuthService().getCurrentUser();
+    final chatRepo = ChatRepositoryImpl(
+      ChatMessageLocal(objectbox.store.box<ChatMessageEntity>()),
+      ChatMessageRemote(),
+    );
     return Drawer(
       child: Column(
         children: [
@@ -61,7 +70,7 @@ class CustomDrawerEnd extends StatelessWidget {
               bool confirm = await showConfirmDialog(
                 context,
                 title: "Bạn có chắc muốn thoát?",
-                content: "Bạn có thể sẽ không tìm lại được người này sau khi thoát! ",
+                content: "Bạn sẽ mất lịch sử trò chuyện có thể sẽ không tìm lại được người này sau khi thoát!",
                 cancelText: "Không",
                 confirmText: "Xác nhận",
                 confirmColor: Colors.red,
@@ -69,9 +78,16 @@ class CustomDrawerEnd extends StatelessWidget {
               if (confirm) {
                 try {
                   print('Xác nhận thoát');
-                  await ChatMessageRemote().endChat();
-                  GoRouter.of(context).go('/find', extra: user!.uid);
-                  Navigator.pop(context);
+                  final end = await chatRepo.endChat();
+                  if(end){
+                    GoRouter.of(context).go('/find', extra: user!.uid);
+                    Navigator.pop(context);
+                    showToast(context, 'Đã thoát cuộc trò chuyện', isError: false);
+                  }
+                  else{
+                    Navigator.pop(context);
+                    showToast(context, 'Lỗi khi thoát', isError: true);
+                  }
                 } catch (e) {
                   print('Lỗi khi thoát: $e');
                 }

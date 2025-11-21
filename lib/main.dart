@@ -3,6 +3,7 @@ import 'package:chat/src/data/repositories_impl/auth_repository_impl.dart';
 import 'package:chat/src/data/datasources/remote/chat_message_remote.dart';
 import 'package:chat/src/presentation/blocs/auth/auth_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,21 +13,19 @@ import 'object_box.dart';
 
 late ObjectBox objectbox;
 Future<void> main()async {
-  await dotenv.load(fileName: ".env");
   try {
     print('🚀 [MAIN] Starting app...');
     WidgetsFlutterBinding.ensureInitialized();
     print('✅ [MAIN] WidgetsFlutterBinding initialized');
-    
+    await dotenv.load(fileName: ".env");
     objectbox = await ObjectBox.create();
     print('✅ [MAIN] Objectbox initialized');
-
     print('🔥 [MAIN] Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    FirebaseDatabase.instance.setPersistenceEnabled(true);
     print('✅ [MAIN] Firebase initialized');
-
     print('🎯 [MAIN] Running app...');
     runApp(MyApp());
   } catch (e, stackTrace) {
@@ -51,7 +50,6 @@ Future<void> main()async {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    // Restart app
                     main();
                   },
                   child: const Text('Thử lại'),

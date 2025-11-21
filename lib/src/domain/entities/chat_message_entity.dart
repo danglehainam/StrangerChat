@@ -11,6 +11,7 @@ class ChatMessageEntity{
   String senderId;
   String text;
   int timestamp;
+  int? status;
   String? imageUrl;
 
   ChatMessageEntity({
@@ -18,12 +19,13 @@ class ChatMessageEntity{
     required this.senderId,
     required this.text,
     required this.timestamp,
+    this.status,
     this.imageUrl,
   });
 
   ChatMessageModel toModel() {
     return ChatMessageModel(
-      id: messageId, // Dùng messageId của Entity làm id của Model
+      id: messageId,
       senderId: senderId,
       text: text,
       timestamp: timestamp,

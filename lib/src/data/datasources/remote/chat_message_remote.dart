@@ -69,7 +69,6 @@ class ChatMessageRemote {
   Stream<ChatMessageModel> messagesStreamChildAdded(String roomId) {
     print('[ChatRemote] Setting up incremental messages stream');
     final ref = _messagesRef.child('rooms').child(roomId).child('messages');
-
     return ref
         .orderByChild('timestamp')
         .onChildAdded
@@ -105,20 +104,25 @@ class ChatMessageRemote {
 
   Future<String?> getCurrentRoom(String uid) async {
     try {
-      final event = await FirebaseDatabase.instance
+      final snapshot = await FirebaseDatabase.instance
           .ref('users/$uid/currentRoom')
-          .once();
+          .get()
+          .timeout(const Duration(seconds: 5));
 
-      final value = event.snapshot.value;
-      if (value != null) {
-        return value as String;
-      }
-      return null;
+      if (snapshot.value == null) return null;
+
+      return snapshot.value as String;
+    } on TimeoutException {
+      print('Timeout khi lấy currentRoom (mất mạng)');
+      return 'TIMEOUT';
     } catch (e) {
-      print('Lỗi khi lấy currentRoom: $e');
+      print('Lỗi khác khi lấy currentRoom: $e');
       return null;
     }
   }
+
+
+
 
   Future<void> leaveQueue() async {
     final token = await getToken();
@@ -131,15 +135,23 @@ class ChatMessageRemote {
     );
   }
 
-  Future<void> endChat()async{
-    final token = await getToken();
-    await http.post(
+  Future<bool> endChat()async{
+    try{
+      final token = await getToken();
+      await http.post(
         Uri.parse("$baseUrl$end"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
-    );
+      );
+      print('[ChatRemote] Call API end chat successfully');
+      return true;
+    }catch(e){
+      print('[ChatRemote] Error in endChat: $e');
+      return false;
+    }
+
   }
 
   Future<void> dispose()async {

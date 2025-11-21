@@ -7,4 +7,6 @@ abstract class ChatRepository{
   Future<void> saveNewMessageToLocal();
   Stream<ChatMessageModel> listenAndSaveMessages(String roomId);
   Stream<bool> isInRoom(String roomId);
+  Future<void> endChat();
+  void endChatByStranger();
 }

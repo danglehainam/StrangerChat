@@ -12,17 +12,19 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
 
   MessagesBloc({required this.repo}) : super(MessagesInitial()) {
+    on<MessageInit>((event, emit) {
+      emit(MessagesLoadInProgress());
+    });
+
     on<StartListening>((event, emit) async {
       print('[MessagesBloc] StartListening event received');
       emit(MessagesLoadInProgress());
-      // 1. Đồng bộ tin nhắn mới từ server về local
-      print('[MessagesBloc] Syncing new messages to local...');
-      await repo.saveNewMessageToLocal();
-      print('[MessagesBloc] Sync done.');
       final localMessages = repo.getLocalMessages();
       print('[MessagesBloc] Local messages: $localMessages');
       emit(MessagesLoadSuccess(localMessages));
-
+      print('[MessagesBloc] Syncing new messages to local...');
+      await repo.saveNewMessageToLocal();
+      print('[MessagesBloc] Sync done.');
       _subMessage ??= repo.listenAndSaveMessages(event.roomId).listen(
             (msg) {
           add(MessagesUpdated([msg.toEntity()]));
@@ -43,7 +45,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         emit(EndChatState('Đã kết thúc cuộc trò chuyện'));
       }
     });
-
 
     on<MessagesUpdated>((event, emit) {
       final current = (state is MessagesLoadSuccess)

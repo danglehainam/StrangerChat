@@ -28,100 +28,92 @@ class ChatScreen extends StatelessWidget {
     );
     return BlocProvider(
       create: (_) => MessagesBloc(repo: chatRepo)..add(StartListening(roomId)),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FA),
-        appBar: AppBar(
-          title: const Text('Trò chuyện'),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0.5,
-          actions: [
-            Builder(builder: (context){
-              return IconButton(
-                icon: const Icon(Icons.account_circle_outlined),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              );
-            })
-          ],
-        ),
-        drawer: const CustomDrawerStart(),
-        endDrawer: const CustomDrawerEnd(),
-        body: Column(
-          children: [
-            Expanded(
-              child: BlocBuilder<MessagesBloc, MessagesState>(
-                builder: (context, state) {
-                  if (state is MessagesLoadInProgress) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is MessagesLoadSuccess) {
-                    if (state.messages.isEmpty) {
-                      return const Center(
+      child: BlocListener<MessagesBloc, MessagesState>(
+        listenWhen: (previous, current) => current is EndChatState,
+        listener: (context, state) {
+          if (state is EndChatState) {
+            context.go('/find', extra: authService.getCurrentUser()!.uid);
+            chatRepo.endChatByStranger();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF7F8FA),
+          appBar: AppBar(
+            title: const Text('Trò chuyện'),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0.5,
+            actions: [
+              Builder(builder: (context){
+                return IconButton(
+                  icon: const Icon(Icons.account_circle_outlined),
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                );
+              })
+            ],
+          ),
+          drawer: const CustomDrawerStart(),
+          endDrawer: const CustomDrawerEnd(),
+          body: Column(
+            children: [
+              Expanded(
+                child: BlocBuilder<MessagesBloc, MessagesState>(
+                  builder: (context, state) {
+                    if (state is MessagesLoadInProgress) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is MessagesLoadSuccess) {
+                      if (state.messages.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Hãy gửi “Xin chào 👋” để bắt đầu cuộc trò chuyện',
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        );
+                      } else {
+                        final list = state.messages;
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          reverse: true,
+                          itemCount: list.length,
+                          itemBuilder: (context, idx) {
+                            final m = list[list.length - 1 - idx];
+                            final mine = m.senderId == authService.getCurrentUser()?.uid;
+                            return ChatMessageWidget(
+                              message: m,
+                              mine: mine,
+                              onTap: () {
+                                print('Clicked message: ${m.text}');
+                              },
+                              onLongPress: () {
+                                print('Long pressed message: ${m.text}');
+                                // ví dụ: show bottom sheet, menu delete, copy text...
+                              },
+                            );
+                          },
+                        );
+                      }
+                    }
+                    if (state is MessagesFailure) {
+                      return Center(
                         child: Text(
-                          'Hãy gửi “Xin chào 👋” để bắt đầu cuộc trò chuyện',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          'Lỗi: ${state.error}',
+                          style: const TextStyle(color: Colors.red),
                         ),
-                      );
-                    } else {
-                      final list = state.messages;
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        reverse: true,
-                        itemCount: list.length,
-                        itemBuilder: (context, idx) {
-                          final m = list[list.length - 1 - idx];
-                          final mine = m.senderId == authService.getCurrentUser()?.uid;
-                          return ChatMessageWidget(
-                            message: m,
-                            mine: mine,
-                            onTap: () {
-                              print('Clicked message: ${m.text}');
-                            },
-                            onLongPress: () {
-                              print('Long pressed message: ${m.text}');
-                              // ví dụ: show bottom sheet, menu delete, copy text...
-                            },
-                          );
-                        },
                       );
                     }
-                  }
-                  if (state is MessagesFailure) {
-                    return Center(
-                      child: Text(
-                        'Lỗi: ${state.error}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    );
-                  }
-                  if (state is EndChatState) {
-                    return Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          context.go('/find', extra: authService.getCurrentUser()!.uid);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                        child: Text(
-                          state.message,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
-                  }
-                  return const Center(child: Text('Không có dữ liệu'));
-                },
+                    return const Center(child: Text('Không có dữ liệu'));
+                  },
+                ),
               ),
-            ),
-            _MessageComposer(userId: authService.getCurrentUser()!.uid, roomId: roomId),
-          ],
+              _MessageComposer(userId: authService.getCurrentUser()!.uid, roomId: roomId),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

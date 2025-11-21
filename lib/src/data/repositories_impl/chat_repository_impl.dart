@@ -7,8 +7,8 @@ import 'package:chat/src/domain/repositories/chat_repository.dart';
 import '../datasources/remote/chat_message_remote.dart';
 
 class ChatRepositoryImpl implements ChatRepository{
-  ChatMessageLocal _local;
-  ChatMessageRemote _remote;
+  final ChatMessageLocal _local;
+  final ChatMessageRemote _remote;
   StreamSubscription<ChatMessageModel>? _sub;
   ChatRepositoryImpl(this._local, this._remote);
 
@@ -61,14 +61,28 @@ class ChatRepositoryImpl implements ChatRepository{
   @override
   Stream<ChatMessageModel> listenAndSaveMessages(String roomId) {
     return _remote.messagesStreamChildAdded(roomId).map((msg) {
-      _local.saveMessage(msg.toEntity()); // lưu vào ObjectBox
-      return msg; // trả về cho bloc
+      _local.saveMessage(msg.toEntity());
+      return msg;
     });
   }
 
   @override
   Stream<bool> isInRoom(String roomId) {
     return _remote.isInRoom(roomId);
+  }
+
+  @override
+  Future<bool> endChat() async {
+    final callAPIEnd = await _remote.endChat();
+    if(callAPIEnd){
+      _local.removeAllMessages();
+      return true;
+    }
+    return false;
+  }
+
+  void endChatByStranger() {
+    _local.removeAllMessages();
   }
 
   void stopListening() {

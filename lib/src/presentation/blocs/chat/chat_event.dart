@@ -3,6 +3,7 @@ import 'package:chat/src/domain/entities/chat_message_entity.dart';
 import '../../../data/models/chat_message_models.dart';
 
 abstract class MessagesEvent {}
+class MessageInit extends MessagesEvent{}
 class StartListening extends MessagesEvent {
   final String roomId;
   StartListening(this.roomId);
