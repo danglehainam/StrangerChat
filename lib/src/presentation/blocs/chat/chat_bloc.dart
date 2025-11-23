@@ -5,40 +5,46 @@ import '../../../data/repositories_impl/chat_repository_impl.dart';
 import 'chat_event.dart';
 import 'chat_state.dart';
 
-class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
+class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepositoryImpl repo;
   StreamSubscription<ChatMessageModel>? _subMessage;
   StreamSubscription<bool>? _subInRoom;
 
 
-  MessagesBloc({required this.repo}) : super(MessagesInitial()) {
-    on<MessageInit>((event, emit) {
+  ChatBloc({required this.repo}) : super(MessagesInitial()) {
+    on<ChatInit>((event, emit) async{
       emit(MessagesLoadInProgress());
+      final localMessages = repo.getLocalMessages();
+      print('[ChatBloc] Local messages: $localMessages');
+      emit(MessagesLoadSuccess(localMessages));
+      print('[ChatBloc] Syncing new messages to local...');
+      await repo.saveNewMessageToLocal();
+      print('[ChatBloc] Sync done.');
     });
 
     on<StartListening>((event, emit) async {
-      print('[MessagesBloc] StartListening event received');
       emit(MessagesLoadInProgress());
       final localMessages = repo.getLocalMessages();
-      print('[MessagesBloc] Local messages: $localMessages');
+      print('[ChatBloc] Local messages: $localMessages');
       emit(MessagesLoadSuccess(localMessages));
-      print('[MessagesBloc] Syncing new messages to local...');
+      print('[ChatBloc] Syncing new messages to local...');
       await repo.saveNewMessageToLocal();
-      print('[MessagesBloc] Sync done.');
+      print('[ChatBloc] Sync done.');
+      print('[ChatBloc] StartListening event received');
       _subMessage ??= repo.listenAndSaveMessages(event.roomId).listen(
             (msg) {
           add(MessagesUpdated([msg.toEntity()]));
         },
         onError: (e) => addError(e),
       );
-      print('[MessagesBloc] Subscribed to messages stream');
+      print('[ChatBloc] Subscribed to messages stream');
       _subInRoom ??= repo.isInRoom(event.roomId).listen((isInRoom) {
           add(EndChatEvent(isInRoom));
         },
         onError: (e) => addError(e),
       );
     });
-    print('[MessagesBloc] Subscribed to is in room stream');
+    print('[ChatBloc] Subscribed to is in room stream');
 
     on<EndChatEvent>((event, emit) {
       if (!event.isInRoom) {
@@ -55,21 +61,21 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
 
     on<SendMessageEvent>((event, emit) async {
-      print('[MessagesBloc] SendMessageEvent received with message: ${event.message}');
+      print('[ChatBloc] SendMessageEvent received with message: ${event.message}');
       try {
         await repo.sendMessage(event.roomId, event.message);
-        print('[MessagesBloc] Message sent successfully');
+        print('[ChatBloc] Message sent successfully');
       } catch (e) {
-        print('[MessagesBloc] Error sending message: $e');
+        print('[ChatBloc] Error sending message: $e');
         emit(MessagesFailure(e.toString()));
       }
     });
 
     on<StopListening>((event, emit) async {
-      print('[MessagesBloc] StopListening event received');
+      print('[ChatBloc] StopListening event received');
       await _subMessage?.cancel();
       await _subInRoom?.cancel();
-      print('[MessagesBloc] Stream subscription canceled');
+      print('[ChatBloc] Stream subscription canceled');
       _subMessage = null;
       _subInRoom = null;
     });
@@ -77,7 +83,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
   @override
   Future<void> close() {
-    print('[MessagesBloc] close called, canceling subscription if exists');
+    print('[ChatBloc] close called, canceling subscription if exists');
     _subMessage?.cancel();
     return super.close();
   }

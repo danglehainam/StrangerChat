@@ -27,8 +27,8 @@ class ChatScreen extends StatelessWidget {
       ChatMessageRemote(),
     );
     return BlocProvider(
-      create: (_) => MessagesBloc(repo: chatRepo)..add(StartListening(roomId)),
-      child: BlocListener<MessagesBloc, MessagesState>(
+      create: (_) => ChatBloc(repo: chatRepo)..add(StartListening(roomId)),
+      child: BlocListener<ChatBloc, ChatState>(
         listenWhen: (previous, current) => current is EndChatState,
         listener: (context, state) {
           if (state is EndChatState) {
@@ -60,7 +60,7 @@ class ChatScreen extends StatelessWidget {
           body: Column(
             children: [
               Expanded(
-                child: BlocBuilder<MessagesBloc, MessagesState>(
+                child: BlocBuilder<ChatBloc, ChatState>(
                   builder: (context, state) {
                     if (state is MessagesLoadInProgress) {
                       return const Center(child: CircularProgressIndicator());
@@ -183,7 +183,7 @@ class _MessageComposerState extends State<_MessageComposer> {
       text: text,
       timestamp: DateTime.now().millisecondsSinceEpoch,
     );
-    context.read<MessagesBloc>().add(SendMessageEvent(msg, widget.roomId));
+    context.read<ChatBloc>().add(SendMessageEvent(msg, widget.roomId));
     _controller.clear();
   }
 }
