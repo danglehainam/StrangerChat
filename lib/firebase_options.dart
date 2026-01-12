@@ -53,11 +53,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDQWFuJoEN5CGRGnDb6wd8_DyZ5AGU9Zio',
-    appId: '1:307657646165:android:88036b389df015310b34dc',
-    messagingSenderId: '307657646165',
-    projectId: 'strangerschatbynam',
-    databaseURL: 'https://strangerschatbynam-default-rtdb.asia-southeast1.firebasedatabase.app',
-    storageBucket: 'strangerschatbynam.firebasestorage.app',
+    apiKey: 'AIzaSyAzDlkAQ3v9fCrybUkL_LCi2qX5eNl5Y1k',
+    appId: '1:183611380162:android:e31dbc03fd2b32cf26865b',
+    messagingSenderId: '183611380162',
+    projectId: 'motnguoitrenmang',
+    databaseURL: 'https://motnguoitrenmang-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'motnguoitrenmang.firebasestorage.app',
   );
+
 }

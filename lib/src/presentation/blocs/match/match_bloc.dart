@@ -14,7 +14,8 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   MatchBloc({required this.chatRemote, required this.firebase}) : super(MatchInitial()) {
     on<StartFindEvent>(_onStartFind);
     on<StopFindEvent>(_onStopFind);
-    on<RoomFoundEvent>((event, emit) {
+    on<RoomFoundEvent>((event, emit) async{
+      await _listener?.cancel();
       final roomId = event.roomId;
       if (roomId != null) {
         emit(MatchFound(roomId));
@@ -26,6 +27,7 @@ class MatchBloc extends Bloc<MatchEvent, MatchState> {
   }
 
   Future<void> _onStartFind(StartFindEvent event, Emitter<MatchState> emit) async {
+    await _listener?.cancel();
     emit(MatchLoading());
     try {
 

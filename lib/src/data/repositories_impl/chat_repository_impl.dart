@@ -67,9 +67,11 @@ class ChatRepositoryImpl implements ChatRepository{
   }
 
   @override
-  Stream<bool> isInRoom(String roomId) {
-    return _remote.isInRoom(roomId);
+  Stream<bool> isInRoomStream(String roomId) {
+    return _remote.isInRoomStream(roomId);
   }
+
+
 
   @override
   Future<bool> endChat() async {
@@ -81,6 +83,7 @@ class ChatRepositoryImpl implements ChatRepository{
     return false;
   }
 
+  @override
   void endChatByStranger() {
     _local.removeAllMessages();
   }

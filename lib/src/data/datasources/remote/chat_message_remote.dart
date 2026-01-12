@@ -59,12 +59,43 @@ class ChatMessageRemote {
     }
   }
 
-  Stream<bool> isInRoom(String roomId){
+  Future<bool> checkInRoom(String roomId) async {
+    final roomRef = _messagesRef.child('rooms').child(roomId);
+    final roomSnap = await roomRef.get();
+    if (roomSnap.value == null) {
+      return false;
+    }
+    final usersSnap = await roomRef.child('users').get();
+    if (usersSnap.value == null) {
+      return false;
+    }
+    final users = usersSnap.value;
+    int count = 0;
+
+    if (users is Map) {
+      count = users.length;
+    } else {
+      return false;
+    }
+    return count >= 2;
+  }
+
+
+  Stream<bool> isInRoomStream(String roomId) {
     final ref = _messagesRef.child('rooms').child(roomId);
+
     return ref.onValue.map((event) {
-      return event.snapshot.value != null;
+      final roomData = event.snapshot.value;
+      if (roomData == null) return false;
+      final users = event.snapshot.child('users').value;
+      if (users == null) return false;
+      if (users is Map) {
+        return users.length == 2;
+      }
+      return false;
     });
   }
+
 
   Stream<ChatMessageModel> messagesStreamChildAdded(String roomId) {
     print('[ChatRemote] Setting up incremental messages stream');
@@ -121,6 +152,22 @@ class ChatMessageRemote {
     }
   }
 
+  Future<bool> isChatting(String roomId) async {
+    final usersRef = _messagesRef.child('rooms').child(roomId).child('users');
+    final snap = await usersRef.get();
+
+    if (snap.value == null) {
+      return false;
+    }
+
+    final data = snap.value;
+
+    if (data is Map) {
+      return data.length == 2;
+    }
+
+    return false;
+  }
 
 
 

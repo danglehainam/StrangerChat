@@ -14,22 +14,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatBloc({required this.repo}) : super(MessagesInitial()) {
     on<ChatInit>((event, emit) async{
       emit(MessagesLoadInProgress());
+      await repo.saveNewMessageToLocal();
+      print('[ChatBloc] Sync done.');
       final localMessages = repo.getLocalMessages();
       print('[ChatBloc] Local messages: $localMessages');
       emit(MessagesLoadSuccess(localMessages));
       print('[ChatBloc] Syncing new messages to local...');
-      await repo.saveNewMessageToLocal();
-      print('[ChatBloc] Sync done.');
     });
 
     on<StartListening>((event, emit) async {
-      emit(MessagesLoadInProgress());
-      final localMessages = repo.getLocalMessages();
-      print('[ChatBloc] Local messages: $localMessages');
-      emit(MessagesLoadSuccess(localMessages));
-      print('[ChatBloc] Syncing new messages to local...');
-      await repo.saveNewMessageToLocal();
-      print('[ChatBloc] Sync done.');
       print('[ChatBloc] StartListening event received');
       _subMessage ??= repo.listenAndSaveMessages(event.roomId).listen(
             (msg) {
@@ -38,7 +31,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         onError: (e) => addError(e),
       );
       print('[ChatBloc] Subscribed to messages stream');
-      _subInRoom ??= repo.isInRoom(event.roomId).listen((isInRoom) {
+      _subInRoom ??= repo.isInRoomStream(event.roomId).listen((isInRoom) {
           add(EndChatEvent(isInRoom));
         },
         onError: (e) => addError(e),

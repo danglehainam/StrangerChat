@@ -24,7 +24,7 @@ Future<void> main()async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    FirebaseDatabase.instance.setPersistenceEnabled(true);
+    FirebaseDatabase.instance.setPersistenceEnabled(false);
     print('✅ [MAIN] Firebase initialized');
     print('🎯 [MAIN] Running app...');
     runApp(MyApp());
